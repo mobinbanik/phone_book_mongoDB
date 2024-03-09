@@ -69,13 +69,6 @@ def get_contacts():
         contacts = collection.find()
         for contact in contacts:
             yield contact
-            # yield {
-            #     "First Name": contact.first_name,
-            #     "Last Name": contact.last_name,
-            #     "Number": contact.number,
-            #     "Address": contact.address,
-            #     "Id": str(contact.get_id()),
-            # }
     except Exception as e:
         print("Error", e)
     finally:
@@ -133,21 +126,8 @@ def search_contact(search_term: str):
                 },
             ]
         )
-        # .where(
-        #     (Contact.first_name.contains(search_term))
-        #     | (Contact.last_name.contains(search_term))
-        #     | (Contact.number.contains(search_term))
-        #     | (Contact.address.contains(search_term))
-        # ))
         for contact in retrieved_data:
             yield contact
-            # yield {
-            #     "First Name": contact.first_name,
-            #     "Last Name": contact.last_name,
-            #     "Number": contact.number,
-            #     "Address": contact.address,
-            #     "Id": str(contact.get_id()),
-            # }
     except Exception as e:
         print("Error", e)
     finally:
