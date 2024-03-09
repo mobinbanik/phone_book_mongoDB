@@ -44,7 +44,7 @@ class Table(QTableWidget):
         self.setItem(row, 1, QTableWidgetItem(contact["Last Name"]))
         self.setItem(row, 2, QTableWidgetItem(contact["Number"]))
         self.setItem(row, 3, QTableWidgetItem(contact["Address"]))
-        self.setItem(row, 4, QTableWidgetItem(contact["Id"]))
+        self.setItem(row, 4, QTableWidgetItem(str(contact["_id"])))
 
 
 class MainWindow(QMainWindow):

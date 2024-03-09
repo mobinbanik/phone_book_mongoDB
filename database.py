@@ -1,5 +1,6 @@
 """Q.
 """
+from bson.objectid import ObjectId
 from database_manager import DatabaseManager
 import local_settings
 
@@ -8,6 +9,7 @@ database_manager = DatabaseManager(
     host=local_settings.DATABASE['host'],
     port=local_settings.DATABASE['port'],
 )
+collection = database_manager.create_collection(model="contacts")
 
 
 class Contact:
@@ -29,15 +31,24 @@ class Contact:
     def create(cls, first_name, last_name, number, address):
         contact_instance = cls(first_name, last_name, number, address)
         contact = contact_instance.get_contact()
-        database_manager.mongo_db.
+        collection.insert_one(contact)
+
+    @classmethod
+    def delete(cls, contact):
+        collection.delete_one(contact)
+
+    @classmethod
+    def delete_by_id(cls, contact_id):
+        collection.find_one_and_delete({"_id": ObjectId(contact_id)})
+        print(contact_id)
 
 
 def initialize_database():
     try:
-        database_manager.create_tables(models=[Contact])
         with open("init_data.txt", "r") as init:
             for line in init:
                 contact = line.split(",")
+                print(line)
                 Contact.create(
                     first_name=contact[0],
                     last_name=contact[1],
@@ -48,28 +59,29 @@ def initialize_database():
         print("Error", e)
     finally:
         # closing database connection.
-        if database_manager.mongo_db:
+        if database_manager is not None:
             database_manager.close_connection()
             print("Database connection is closed")
 
 
 def get_contacts():
     try:
-        contacts = Contact.select()
+        contacts = collection.find()
         for contact in contacts:
-            yield {
-                "First Name": contact.first_name,
-                "Last Name": contact.last_name,
-                "Number": contact.number,
-                "Address": contact.address,
-                "Id": str(contact.get_id()),
-            }
+            yield contact
+            # yield {
+            #     "First Name": contact.first_name,
+            #     "Last Name": contact.last_name,
+            #     "Number": contact.number,
+            #     "Address": contact.address,
+            #     "Id": str(contact.get_id()),
+            # }
     except Exception as e:
         print("Error", e)
     finally:
         # closing database connection.
-        if database_manager.db:
-            database_manager.db.close()
+        if database_manager is not None:
+            database_manager.close_connection()
             print("Database connection is closed")
 
 
@@ -85,7 +97,7 @@ def add_contact(first_name, last_name, number, address=None):
         print("Error", e)
     finally:
         # closing database connection.
-        if database_manager.mongo_db:
+        if database_manager is not None:
             database_manager.close_connection()
             print("Database connection is closed")
 
@@ -97,32 +109,50 @@ def delete_contact(id_row: int):
         print("Error", e)
     finally:
         # closing database connection.
-        if database_manager.mongo_db:
+        if database_manager is not None:
             database_manager.close_connection()
             print("Database connection is closed")
 
 
 def search_contact(search_term: str):
     try:
-        retrieved_data = Contact.select().where(
-            (Contact.first_name.contains(search_term))
-            | (Contact.last_name.contains(search_term))
-            | (Contact.number.contains(search_term))
-            | (Contact.address.contains(search_term))
+        retrieved_data = collection.aggregate(
+            [
+                {
+                    "$match":
+                        {
+                            "$or":
+                            [
+                                {"First Name": {"$regex": f"{search_term}"}},
+                                {"Last Name": {"$regex": f"{search_term}"}},
+                                {"Number": {"$regex": f"{search_term}"}},
+                                {"Address": {"$regex": f"{search_term}"}},
+                            ]
+
+                        }
+                },
+            ]
         )
+        # .where(
+        #     (Contact.first_name.contains(search_term))
+        #     | (Contact.last_name.contains(search_term))
+        #     | (Contact.number.contains(search_term))
+        #     | (Contact.address.contains(search_term))
+        # ))
         for contact in retrieved_data:
-            yield {
-                "First Name": contact.first_name,
-                "Last Name": contact.last_name,
-                "Number": contact.number,
-                "Address": contact.address,
-                "Id": str(contact.get_id()),
-            }
+            yield contact
+            # yield {
+            #     "First Name": contact.first_name,
+            #     "Last Name": contact.last_name,
+            #     "Number": contact.number,
+            #     "Address": contact.address,
+            #     "Id": str(contact.get_id()),
+            # }
     except Exception as e:
         print("Error", e)
     finally:
         # closing database connection.
-        if database_manager.mongo_db:
+        if database_manager is not None:
             database_manager.close_connection()
             print("Database connection is closed")
 
