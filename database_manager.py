@@ -19,8 +19,7 @@ class DatabaseManager:
         return mongo_db
 
     def close_connection(self):
-        # self.client.close()
-        pass
+        self.client.close()
 
     def create_collection(self, model="contacts"):
         # self.db.create_tables(models)

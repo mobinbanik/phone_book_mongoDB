@@ -1,4 +1,6 @@
-"""Phonebook application."""
+"""Phonebook application.
+
+use mongoDB."""
 from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QTableWidget,
     QTableWidgetItem, QDockWidget, QFormLayout,
@@ -12,7 +14,9 @@ import database
 
 
 class Table(QTableWidget):
+    """Tabel widget."""
     def __init__(self, row=1, col=5, parent=None):
+        """Create table widget."""
         super().__init__(parent)
         self.setColumnCount(col)
         self.setRowCount(row)
@@ -27,6 +31,10 @@ class Table(QTableWidget):
         ])
 
     def update_data(self, data=None):
+        """Update table data.
+
+        :param data: data for tabel
+        """
         self.setRowCount(0)
         row = 0
         if data is not None:
@@ -39,6 +47,17 @@ class Table(QTableWidget):
                 row += 1
 
     def add_row(self, row: int, contact: dict) -> None:
+        """Add new row.
+
+        :param row: new row index.
+        :param contact: dict = {
+        "First Name": "***",
+        "Last Name": "***",
+        "Number": "***",
+        "Address": "***",
+        "Id": "***",
+        }
+        """
         self.insertRow(row)
         self.setItem(row, 0, QTableWidgetItem(contact["First Name"]))
         self.setItem(row, 1, QTableWidgetItem(contact["Last Name"]))
@@ -130,6 +149,10 @@ class MainWindow(QMainWindow):
         pass
 
     def search(self, text):
+        """Search for text in the database.
+
+        :param text: The text to search
+        """
         self.table.update_data(database.search_contact(text))
 
     def delete(self):
